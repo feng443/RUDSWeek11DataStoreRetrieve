@@ -82,14 +82,12 @@ def min_avg_max_temp_start(start):
 
 @app.route('/api/v1.0/<start>/<end>')
 def min_avg_max_temp_start_end(start, end):
-    start = start or '1700-01-01'
-    end = end or '9999-12-31'
     tobs = Measurement.tobs
     return jsonify(list(
         Session(engine).query(
             func.min(tobs), func.avg(tobs), func.max(tobs)
         ).filter(
-            Measurement.date.between(start, end)
+            Measurement.date.between(start or '1700-01-01', end or '9999-12-31')
         ).all()[0]
     ))
 
