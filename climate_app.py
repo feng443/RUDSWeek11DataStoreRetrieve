@@ -19,14 +19,13 @@ Measurement = Base.classes.measurement
 Station = Base.classes.station
 
 END_DATE = Session(engine).query(func.max(Measurement.date)).all()[0][0]
-START_DATE = END_DATE - relativedelta(months=12)
+START_DATE = END_DATE - relativedelta(days=364) #365 days
 
 app = Flask(__name__)
 
 @app.route('/')
 def root():
-
-    msg = '''
+    return '''
     <h1>Welcome to the climate API!</h1>
     
     Available Routes:
@@ -39,8 +38,6 @@ def root():
         <li><a href="/api/v1.0/2016-01-01/2017-01-01">/api/v1.0/YYYY-MM-DD/YYYY-MM-DD</a>
     </ul>
     '''
-    print(msg)
-    return msg
 
 @app.route('/api/v1.0/precipitation')
 def precipitation():
@@ -78,24 +75,15 @@ def tobs():
         }
     )
 
+
 @app.route('/api/v1.0/<start>')
 def min_avg_max_temp_start(start):
-    start = start or '1700-01-01'
-    tobs = Measurement.tobs
-    return jsonify(list(
-        Session(engine).query(
-            func.min(tobs), func.avg(tobs), func.max(tobs)
-        ).filter(
-            Measurement.date >= start
-        ).all()[0]
-    ))
-
+    return min_avg_max_temp_start_end(start or '1700-01-01', '9999-12-31')
 
 @app.route('/api/v1.0/<start>/<end>')
 def min_avg_max_temp_start_end(start, end):
     start = start or '1700-01-01'
     end = end or '9999-12-31'
-    print(start, end)
     tobs = Measurement.tobs
     return jsonify(list(
         Session(engine).query(
